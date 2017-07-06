@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private volatile double zebAmountToCheck = 179000;
     private volatile double coinAmountToCheck = 3400;
     private int counter = 0;
+    private TextView logsText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         priceToWatch = (EditText) findViewById(R.id.amount_to_watch);
         currency = (EditText) findViewById(R.id.currency_to_check);
         zebpayPrice = (EditText) findViewById(R.id.zebpay_price);
+        logsText = (TextView) findViewById(R.id.logs_text);
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         String zebPay = "https://api.zebpay.com/api/v1/ticker?currencyCode=INR";
         getResponse(coinDesk, coinAmountToCheck);
 
-        if(counter > 0 && counter <5) {
+        if (counter > 0 && counter < 5) {
             counter++;
             return;
         }
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         counter++;
     }
 
-    private void getResponse(String urlString, double compareAmount) {
+    private void getResponse(String urlString, final double compareAmount) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
@@ -123,7 +126,19 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
 
-                Log.d(TAG, "Value is " + zebAmount + " saved zebAmount " + compareAmount);
+                Log.d(TAG, "Value is " + zebAmount + "    saved zebAmount " + compareAmount);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (logsText.length() > 400) {
+                            logsText.setText("");
+                        }
+                        logsText.setText(logsText.getText() + "\n" + "Current " + zebAmount + " saved zebAmount " + compareAmount);
+
+                    }
+                });
 
             } else {
 
@@ -139,6 +154,17 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
                 Log.d(TAG, "Value is " + coinHAmount + " saved coinHackoAmount " + compareAmount);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (logsText.length() > 400) {
+                            logsText.setText("");
+                        }
+                        logsText.setText(logsText.getText() + "\n" + "Current " + coinHAmount + " saved coinHAmount " + compareAmount);
+                    }
+                });
+
             }
 
         } catch (IOException e) {
